@@ -1,4 +1,5 @@
 import com.google.common.collect.Iterables;
+import grpc.LoadBalancerClient;
 import org.jooby.Jooby;
 
 import java.util.ArrayList;
@@ -19,8 +20,12 @@ public class App extends Jooby {
 
   private final Iterator<String> userServiceRoundRobin = Iterables.cycle(userServiceIpList).iterator();
 
+  private final LoadBalancerClient loadBalancerClient = new LoadBalancerClient("localhost",3000);
+
   {
     get("/", () -> "Hello World!");
+
+    get("/product", (req, rsp) -> productServiceRoundRobin.next());
   }
 
   public static void main(final String[] args) {
