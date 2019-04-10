@@ -1,6 +1,11 @@
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import models.AddProductToWishlist;
+import models.Product;
 import io.grpc.StatusRuntimeException;
 import org.jooby.Jooby;
+import org.jooby.Request;
 import product.Product.ProductReply;
 import product.Product.ProductRequest;
 import product.Product.NewProductRequest;
@@ -18,17 +23,21 @@ public class App extends Jooby {
     get("/", () -> "Hello World!");
 
     get("/product/:id", req -> getProduct(Long.valueOf(req.param("id").value()), stubManager));
-    post("/product", req -> newProduct(req.body().value("name"), req.body().value("description"), stubManager));
+    post("/product", req -> newProduct(getModel(req, Product.class), stubManager));
 
     post("/user", req -> addUser(req.body().value("firstName"), req.body().value("lastName"), stubManager));
-    post("/whishlist/add", req -> addProductToWishlist(req.body().value("userId"), req.body().value("productId"), stubManager));
-    get("/whishlist/:id", req -> getProductFromWishlist(Long.valueOf(req.param("id").value()), stubManager));
+    post("/whishlist/add", req -> addProductToWishlist(getModel(req, AddProductToWishlist.class), stubManager));
+    get("/whishlist/:userId", req -> getProductFromWishlist(Long.valueOf(req.param("userId").value()), stubManager));
     delete("/whishlist/:userId/:productId", req -> deleteProductFromWishlist(req.param("userId").value(), req.param("productId").value(), stubManager));
 
   }
 
   public static void main(final String[] args) {
     run(App::new, args);
+  }
+
+  public static<T> T getModel(Request req, Class<T> tClass) throws Exception{
+    return new Gson().fromJson(req.body().value(), tClass);
   }
 
   public static ProductReply getProduct(Long id, StubManager stubManager) {
@@ -40,7 +49,7 @@ public class App extends Jooby {
         case UNAVAILABLE:
           return getProduct(id, stubManager);
         case INTERNAL:
-          throw new RuntimeException("Product not found");
+          throw new RuntimeException("Models.Product not found");
         default:
           throw new RuntimeException("Unknown error");
       }
@@ -48,28 +57,32 @@ public class App extends Jooby {
     }
   }
 
-  private static ProductReply newProduct(String name, String description, StubManager stubManager) {
+  private static ProductReply newProduct(Product product, StubManager stubManager) {
     try {
-      return stubManager.getNextProductService().newProduct(NewProductRequest.newBuilder().setName(name).setDescription(description).build());
+      return stubManager.getNextProductService()
+              .newProduct(NewProductRequest.newBuilder().setName(product.getName()).setDescription(product.getDescription()).build());
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
-          return newProduct(name, description, stubManager);
+          return newProduct(product, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding product");
         default:
-          throw new RuntimeException("Unknown error");
+          throw new RuntimeException("Unknown errovaluer");
       }
     }
   }
 
-  private static AddProductResponse addProductToWishlist(String userId, String productId, StubManager stubManager) {
+  private static AddProductResponse addProductToWishlist(AddProductToWishlist addProductToWishlist, StubManager stubManager) {
     try {
-      return stubManager.getNextUserService().addProduct(AddProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+      System.out.println("\n\nModels.Product" + addProductToWishlist.getProductId());
+      System.out.println("\n\nModels.User"+ addProductToWishlist.getUserId());
+      return stubManager.getNextUserService()
+              .addProduct(AddProductRequest.newBuilder().setUserId(addProductToWishlist.getUserId()).setProductId(addProductToWishlist.getProductId()).build());
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
-          return addProductToWishlist(userId, productId, stubManager);
+          return addProductToWishlist(addProductToWishlist, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding product to wishlist");
         default:
@@ -87,7 +100,7 @@ public class App extends Jooby {
         case UNAVAILABLE:
           return getProductFromWishlist(id, stubManager);
         case INTERNAL:
-          throw new RuntimeException("User not found");
+          throw new RuntimeException("Models.User not found");
         default:
           throw new RuntimeException("Unknown error");
       }

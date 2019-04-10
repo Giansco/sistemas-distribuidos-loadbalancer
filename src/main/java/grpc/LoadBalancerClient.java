@@ -21,9 +21,9 @@ import com.google.common.collect.Iterables;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.StatusRuntimeException;
-import proto.Product.ProductRequest;
-import proto.Product.ProductReply;
-import proto.User;
+import proto.Models.Product.ProductRequest;
+import proto.Models.Product.ProductReply;
+import proto.Models.User;
 import proto.ProductServiceGrpc;
 
 import java.util.Arrays;
@@ -82,7 +82,7 @@ public class LoadBalancerClient {
       logger.log(Level.WARNING, "RPC failed: {0}", e.getStatus());
       return;
     }
-    logger.info("Product: " + response.getName());
+    logger.info("Models.Product: " + response.getName());
   }
 
   */
