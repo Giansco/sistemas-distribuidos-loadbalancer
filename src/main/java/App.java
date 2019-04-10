@@ -47,11 +47,33 @@ public class App extends Jooby {
   }
 
   private static ProductReply newProduct(String name, String description, StubManager stubManager) {
-    return stubManager.getNextProductService().newProduct(NewProductRequest.newBuilder().setName(name).setDescription(description).build());
+    try {
+      return stubManager.getNextProductService().newProduct(NewProductRequest.newBuilder().setName(name).setDescription(description).build());
+    }catch (StatusRuntimeException e) {
+      switch (e.getStatus().getCode()) {
+        case UNAVAILABLE:
+          return newProduct(name, description, stubManager);
+        case INTERNAL:
+          throw new RuntimeException("Error adding product");
+        default:
+          throw new RuntimeException("Unknown error");
+      }
+    }
   }
 
   private static AddProductResponse addProductToWishlist(String userId, String productId, StubManager stubManager) {
-    return stubManager.getNextUserService().addProduct(AddProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+    try {
+      return stubManager.getNextUserService().addProduct(AddProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+    }catch (StatusRuntimeException e) {
+      switch (e.getStatus().getCode()) {
+        case UNAVAILABLE:
+          return addProductToWishlist(userId, productId, stubManager);
+        case INTERNAL:
+          throw new RuntimeException("Error adding product to wishlist");
+        default:
+          throw new RuntimeException("Unknown error");
+      }
+    }
   }
 
   private static GetProductsResponse getProductFromWishlist(Long id, StubManager stubManager) {
@@ -67,12 +89,23 @@ public class App extends Jooby {
         default:
           throw new RuntimeException("Unknown error");
       }
-
     }
   }
 
   private static DeleteProductResponse deleteProductFromWishlist(String userId, String productId, StubManager stubManager) {
-      return stubManager.getNextUserService().deleteProduct(DeleteProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+      try {
+        return stubManager.getNextUserService().deleteProduct(DeleteProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+      }catch (StatusRuntimeException e) {
+
+        switch (e.getStatus().getCode()) {
+          case UNAVAILABLE:
+            return deleteProductFromWishlist(userId, productId, stubManager);
+          case INTERNAL:
+            throw new RuntimeException("Error deleting product from wishlist");
+          default:
+            throw new RuntimeException("Unknown error");
+        }
+      }
   }
 }
 
