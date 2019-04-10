@@ -1,6 +1,6 @@
 package models;
 
-public class AddProductToWishlist {
+public class WishlistRow {
     private Long userId;
     private Long productId;
 

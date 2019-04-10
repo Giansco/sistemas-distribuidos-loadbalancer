@@ -1,9 +1,9 @@
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import models.AddProductToWishlist;
+import models.WishlistRow;
 import models.Product;
 import io.grpc.StatusRuntimeException;
+import models.User;
 import org.jooby.Jooby;
 import org.jooby.Request;
 import product.Product.ProductReply;
@@ -25,10 +25,10 @@ public class App extends Jooby {
     get("/product/:id", req -> getProduct(Long.valueOf(req.param("id").value()), stubManager));
     post("/product", req -> newProduct(getModel(req, Product.class), stubManager));
 
-    post("/user", req -> addUser(req.body().value("firstName"), req.body().value("lastName"), stubManager));
-    post("/whishlist/add", req -> addProductToWishlist(getModel(req, AddProductToWishlist.class), stubManager));
+    post("/user", req -> addUser(getModel(req, User.class), stubManager));
+    post("/whishlist/add", req -> addProductToWishlist(getModel(req, WishlistRow.class), stubManager));
     get("/whishlist/:userId", req -> getProductFromWishlist(Long.valueOf(req.param("userId").value()), stubManager));
-    delete("/whishlist/:userId/:productId", req -> deleteProductFromWishlist(req.param("userId").value(), req.param("productId").value(), stubManager));
+    delete("/whishlist", req -> deleteProductFromWishlist(getModel(req, WishlistRow.class), stubManager));
 
   }
 
@@ -73,16 +73,16 @@ public class App extends Jooby {
     }
   }
 
-  private static AddProductResponse addProductToWishlist(AddProductToWishlist addProductToWishlist, StubManager stubManager) {
+  private static AddProductResponse addProductToWishlist(WishlistRow wishlistRow, StubManager stubManager) {
     try {
-      System.out.println("\n\nModels.Product" + addProductToWishlist.getProductId());
-      System.out.println("\n\nModels.User"+ addProductToWishlist.getUserId());
+      System.out.println("\n\nModels.Product" + wishlistRow.getProductId());
+      System.out.println("\n\nModels.User"+ wishlistRow.getUserId());
       return stubManager.getNextUserService()
-              .addProduct(AddProductRequest.newBuilder().setUserId(addProductToWishlist.getUserId()).setProductId(addProductToWishlist.getProductId()).build());
+              .addProduct(AddProductRequest.newBuilder().setUserId(wishlistRow.getUserId()).setProductId(wishlistRow.getProductId()).build());
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
-          return addProductToWishlist(addProductToWishlist, stubManager);
+          return addProductToWishlist(wishlistRow, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding product to wishlist");
         default:
@@ -107,14 +107,15 @@ public class App extends Jooby {
     }
   }
 
-  private static DeleteProductResponse deleteProductFromWishlist(String userId, String productId, StubManager stubManager) {
+  private static DeleteProductResponse deleteProductFromWishlist(WishlistRow wishlistRow, StubManager stubManager) {
       try {
-        return stubManager.getNextUserService().deleteProduct(DeleteProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+        System.out.println("\n\nModels.Product " + wishlistRow.getProductId());
+        System.out.println("\n\nModels.User "+ wishlistRow.getUserId());
+        return stubManager.getNextUserService().deleteProduct(DeleteProductRequest.newBuilder().setUserId(wishlistRow.getUserId()).setProductId(wishlistRow.getProductId()).build());
       }catch (StatusRuntimeException e) {
-
         switch (e.getStatus().getCode()) {
           case UNAVAILABLE:
-            return deleteProductFromWishlist(userId, productId, stubManager);
+            return deleteProductFromWishlist(wishlistRow, stubManager);
           case INTERNAL:
             throw new RuntimeException("Error deleting product from wishlist");
           default:
@@ -123,13 +124,13 @@ public class App extends Jooby {
       }
   }
 
-  private static AddUserResponse addUser(String firstName, String lastName, StubManager stubManager) {
+  private static AddUserResponse addUser(User user, StubManager stubManager) {
     try {
-      return stubManager.getNextUserService().addUser(AddUserRequest.newBuilder().setFirstName(firstName).setLastName(lastName).build());
+      return stubManager.getNextUserService().addUser(AddUserRequest.newBuilder().setFirstName(user.getFirstName()).setLastName(user.getLastName()).build());
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
-          return addUser(firstName, firstName, stubManager);
+          return addUser(user, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding an user");
         default:
