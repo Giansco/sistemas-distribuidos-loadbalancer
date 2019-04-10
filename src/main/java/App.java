@@ -19,6 +19,8 @@ public class App extends Jooby {
 
     get("/product/:id", req -> getProduct(Long.valueOf(req.param("id").value()), stubManager));
     post("/product", req -> newProduct(req.body().value("name"), req.body().value("description"), stubManager));
+
+    post("/user", req -> addUser(req.body().value("firstName"), req.body().value("lastName"), stubManager));
     post("/whishlist/add", req -> addProductToWishlist(req.body().value("userId"), req.body().value("productId"), stubManager));
     get("/whishlist/:id", req -> getProductFromWishlist(Long.valueOf(req.param("id").value()), stubManager));
     delete("/whishlist/:userId/:productId", req -> deleteProductFromWishlist(req.param("userId").value(), req.param("productId").value(), stubManager));
@@ -106,6 +108,21 @@ public class App extends Jooby {
             throw new RuntimeException("Unknown error");
         }
       }
+  }
+
+  private static AddUserResponse addUser(String firstName, String lastName, StubManager stubManager) {
+    try {
+      return stubManager.getNextUserService().addUser(AddUserRequest.newBuilder().setFirstName(firstName).setLastName(lastName).build());
+    }catch (StatusRuntimeException e) {
+      switch (e.getStatus().getCode()) {
+        case UNAVAILABLE:
+          return addUser(firstName, firstName, stubManager);
+        case INTERNAL:
+          throw new RuntimeException("Error adding an user");
+        default:
+          throw new RuntimeException("Unknown error");
+      }
+    }
   }
 }
 

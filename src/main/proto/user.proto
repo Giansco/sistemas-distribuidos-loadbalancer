@@ -8,6 +8,7 @@ service UserService {
     rpc AddProduct (AddProductRequest) returns (AddProductResponse) {}
     rpc getProducts (GetProductsRequest) returns (GetProductsResponse) {}
     rpc deleteProduct (DeleteProductRequest) returns (DeleteProductResponse) {}
+    rpc addUser (AddUserRequest) returns (AddUserResponse) {}
 }
 
 // Add product messages
@@ -37,4 +38,13 @@ message DeleteProductRequest {
 
 message DeleteProductResponse {
     int64 productId = 1;
+}
+
+message AddUserRequest {
+    string firstName = 1;
+    string lastName = 2;
+}
+
+message AddUserResponse {
+    int64 userId = 1;
 }

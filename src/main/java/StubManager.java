@@ -19,9 +19,9 @@ public class StubManager {
 
     public StubManager() {
         List<UserServiceGrpc.UserServiceBlockingStub> userServiceList =  Arrays.asList(
-                UserServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50000).usePlaintext().build()),
-                UserServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50000).usePlaintext().build()),
-                UserServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50000).usePlaintext().build()));
+                UserServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50001).usePlaintext().build()),
+                UserServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50001).usePlaintext().build()),
+                UserServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50001).usePlaintext().build()));
 
         List<ProductServiceGrpc.ProductServiceBlockingStub> productServiceList =  Arrays.asList(
                 ProductServiceGrpc.newBlockingStub(ManagedChannelBuilder.forAddress("localhost", 50000).usePlaintext().build()),
