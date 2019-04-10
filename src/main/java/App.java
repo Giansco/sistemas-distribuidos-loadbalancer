@@ -1,23 +1,10 @@
-import com.google.common.collect.Iterables;
-import io.grpc.ManagedChannelBuilder;
-import io.grpc.Status;
+
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
-import javassist.NotFoundException;
 import org.jooby.Jooby;
-import product.Product;
 import product.Product.ProductReply;
 import product.Product.ProductRequest;
 import product.Product.NewProductRequest;
-import product.ProductServiceGrpc;
-import product.UserServiceGrpc;
 import product.User.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.logging.Level;
 
 /**
  * @author jooby generator
@@ -32,7 +19,10 @@ public class App extends Jooby {
 
     get("/product/:id", req -> getProduct(Long.valueOf(req.param("id").value()), stubManager));
     post("/product", req -> newProduct(req.body().value("name"), req.body().value("description"), stubManager));
-//    get("/whishlist/add", (req, rsp) -> rsp.send(userServiceRoundRobin.next().addProduct()))
+    post("/whishlist/add", req -> addProductToWishlist(req.body().value("userId"), req.body().value("productId"), stubManager));
+    get("/whishlist/:id", req -> getProductFromWishlist(Long.valueOf(req.param("id").value()), stubManager));
+    delete("/whishlist/:userId/:productId", req -> deleteProductFromWishlist(req.param("userId").value(), req.param("productId").value(), stubManager));
+
   }
 
   public static void main(final String[] args) {
@@ -56,8 +46,33 @@ public class App extends Jooby {
     }
   }
 
-  public static ProductReply newProduct(String name, String description, StubManager stubManager) {
+  private static ProductReply newProduct(String name, String description, StubManager stubManager) {
     return stubManager.getNextProductService().newProduct(NewProductRequest.newBuilder().setName(name).setDescription(description).build());
+  }
+
+  private static AddProductResponse addProductToWishlist(String userId, String productId, StubManager stubManager) {
+    return stubManager.getNextUserService().addProduct(AddProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
+  }
+
+  private static GetProductsResponse getProductFromWishlist(Long id, StubManager stubManager) {
+    try {
+      return stubManager.getNextUserService().getProducts(GetProductsRequest.newBuilder().setUserId(id).build());
+    } catch (StatusRuntimeException e) {
+
+      switch (e.getStatus().getCode()) {
+        case UNAVAILABLE:
+          return getProductFromWishlist(id, stubManager);
+        case INTERNAL:
+          throw new RuntimeException("User not found");
+        default:
+          throw new RuntimeException("Unknown error");
+      }
+
+    }
+  }
+
+  private static DeleteProductResponse deleteProductFromWishlist(String userId, String productId, StubManager stubManager) {
+      return stubManager.getNextUserService().deleteProduct(DeleteProductRequest.newBuilder().setUserId(Long.valueOf(userId)).setProductId(Long.valueOf(productId)).build());
   }
 }
 

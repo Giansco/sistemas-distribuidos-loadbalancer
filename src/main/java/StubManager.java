@@ -35,4 +35,8 @@ public class StubManager {
     public ProductServiceGrpc.ProductServiceBlockingStub getNextProductService() {
         return productServiceRoundRobin.next();
     }
+
+    public UserServiceGrpc.UserServiceBlockingStub getNextUserService() {
+        return userServiceRoundRobin.next();
+    }
 }
