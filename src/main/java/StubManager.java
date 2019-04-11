@@ -16,14 +16,14 @@ import product.User.*;
 
 public class StubManager {
 
-    private final Iterator<ProductServiceGrpc.ProductServiceBlockingStub> productServiceRoundRobin;
+    private Iterator<ProductServiceGrpc.ProductServiceBlockingStub> productServiceRoundRobin;
     private ProductServiceGrpc.ProductServiceBlockingStub currentProduct;
-    private final Iterator<ProductServiceGrpc.ProductServiceBlockingStub> inactiveProductServices;
+    private Iterator<ProductServiceGrpc.ProductServiceBlockingStub> inactiveProductServices;
     private ProductServiceGrpc.ProductServiceBlockingStub currentInactiveProduct;
 
-    private final Iterator<UserServiceGrpc.UserServiceBlockingStub> userServiceRoundRobin;
+    private Iterator<UserServiceGrpc.UserServiceBlockingStub> userServiceRoundRobin;
     private UserServiceGrpc.UserServiceBlockingStub currentUser;
-    private final Iterator<UserServiceGrpc.UserServiceBlockingStub> inactiveUserServices;
+    private Iterator<UserServiceGrpc.UserServiceBlockingStub> inactiveUserServices;
     private UserServiceGrpc.UserServiceBlockingStub currentInactiveUser;
 
     public StubManager() {
@@ -125,7 +125,7 @@ public class StubManager {
     private void checkProductInactivity() {
         if (currentInactiveProduct != null) {
             try {
-                currentInactiveProduct.isActive(PingRequest.newBuilder().build());
+                currentInactiveProduct.isActive(Product.PingRequest.newBuilder().build());
                 inactiveProductIsNowActive();
                 checkProductInactivity();
             }catch (StatusRuntimeException e) {
@@ -140,7 +140,7 @@ public class StubManager {
     private void checkUserInactivity() {
         if (currentInactiveUser != null) {
             try {
-                currentInactiveUser.isActive(PingRequest.newBuilder().build());
+                currentInactiveUser.isActive(Product.PingRequest.newBuilder().build());
                 inactiveUserIsNowActive();
                 checkUserInactivity();
             }catch (StatusRuntimeException e) {
