@@ -11,6 +11,9 @@ import product.Product.ProductRequest;
 import product.Product.NewProductRequest;
 import product.User.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author jooby generator
  */
@@ -27,7 +30,7 @@ public class App extends Jooby {
 
     post("/user", req -> addUser(getModel(req, User.class), stubManager));
     post("/whishlist/add", req -> addProductToWishlist(getModel(req, WishlistRow.class), stubManager));
-    get("/whishlist/:userId", req -> getProductFromWishlist(Long.valueOf(req.param("userId").value()), stubManager));
+    get("/whishlist/:userId", req -> getProductFromWishlist2(Long.valueOf(req.param("userId").value()), stubManager));
     delete("/whishlist", req -> deleteProductFromWishlist(getModel(req, WishlistRow.class), stubManager));
 
   }
@@ -143,6 +146,14 @@ public class App extends Jooby {
           throw new RuntimeException("Unknown error");
       }
     }
+  }
+
+  private static List<ProductReply> getProductFromWishlist2(Long id, StubManager stubManager) {
+    final GetProductsResponse productFromWishlist = getProductFromWishlist(id, stubManager);
+    final List<Long> productsList = productFromWishlist.getProductsList();
+    List<ProductReply> products = new ArrayList<>();
+    productsList.forEach(productId -> products.add(getProduct(productId, stubManager)));
+    return products;
   }
 }
 

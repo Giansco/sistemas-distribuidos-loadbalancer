@@ -28,7 +28,7 @@ message GetProductsRequest {
 }
 
 message GetProductsResponse {
-    repeated ProductReply products = 1;
+    repeated int64 products = 1;
 }
 
 // Delete product messages
