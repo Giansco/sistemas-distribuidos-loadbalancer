@@ -5,6 +5,7 @@ package product;
 service ProductService {
     rpc GetProduct (ProductRequest) returns (ProductReply) {}
     rpc NewProduct (NewProductRequest) returns (ProductReply) {}
+    rpc isActive   (PingRequest) returns (PingReply) {}
 }
 
 message ProductRequest {
@@ -20,4 +21,10 @@ message ProductReply {
 message NewProductRequest {
     string name = 1;
     string description = 2;
+}
+
+message PingRequest {}
+
+message PingReply {
+    string response = 1;
 }
