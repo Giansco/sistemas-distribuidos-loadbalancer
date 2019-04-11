@@ -47,6 +47,7 @@ public class App extends Jooby {
 
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
+          stubManager.currentProductIsInactive();
           return getProduct(id, stubManager);
         case INTERNAL:
           throw new RuntimeException("Models.Product not found");
@@ -64,11 +65,12 @@ public class App extends Jooby {
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
+          stubManager.currentProductIsInactive();
           return newProduct(product, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding product");
         default:
-          throw new RuntimeException("Unknown errovaluer");
+          throw new RuntimeException("Unknown error value");
       }
     }
   }
@@ -82,6 +84,7 @@ public class App extends Jooby {
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
+          stubManager.currentUserIsInactive();
           return addProductToWishlist(wishlistRow, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding product to wishlist");
@@ -98,6 +101,7 @@ public class App extends Jooby {
 
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
+          stubManager.currentUserIsInactive();
           return getProductFromWishlist(id, stubManager);
         case INTERNAL:
           throw new RuntimeException("Models.User not found");
@@ -115,6 +119,7 @@ public class App extends Jooby {
       }catch (StatusRuntimeException e) {
         switch (e.getStatus().getCode()) {
           case UNAVAILABLE:
+            stubManager.currentUserIsInactive();
             return deleteProductFromWishlist(wishlistRow, stubManager);
           case INTERNAL:
             throw new RuntimeException("Error deleting product from wishlist");
@@ -130,6 +135,7 @@ public class App extends Jooby {
     }catch (StatusRuntimeException e) {
       switch (e.getStatus().getCode()) {
         case UNAVAILABLE:
+          stubManager.currentUserIsInactive();
           return addUser(user, stubManager);
         case INTERNAL:
           throw new RuntimeException("Error adding an user");

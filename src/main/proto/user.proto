@@ -8,6 +8,7 @@ service UserService {
     rpc AddProduct (AddProductRequest) returns (AddProductResponse) {}
     rpc getProducts (GetProductsRequest) returns (GetProductsResponse) {}
     rpc deleteProduct (DeleteProductRequest) returns (DeleteProductResponse) {}
+    rpc isActive   (PingRequest) returns (PingReply) {}
     rpc addUser (AddUserRequest) returns (AddUserResponse) {}
 }
 
